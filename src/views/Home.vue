@@ -1,7 +1,7 @@
 <template>
-  <Map />
+  <Main />
 </template>
 
 <script lang="ts" setup>
-import Map from "@/components/Map.vue";
+import Main from "@/components/Main.vue";
 </script>
