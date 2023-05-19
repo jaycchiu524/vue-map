@@ -7,7 +7,7 @@
         <span id="place-address"></span>
       </div>
 
-      <div ref="mapRef" style="height: 100vh" />
+      <div ref="mapRef" style="height: 50vh" />
     </v-responsive>
   </v-container>
 </template>
@@ -16,7 +16,7 @@
 import { ref, onMounted, Ref } from "vue";
 import { Loader } from "@googlemaps/js-api-loader";
 import { Easing, Tween, update } from "@tweenjs/tween.js";
-import { useSearchStore } from "@/store/app";
+import { useSearchStore } from "@/store/search";
 
 const input: Ref<HTMLInputElement | null> = ref(null);
 const infowindowContent: Ref<HTMLDivElement | null> = ref(null);
@@ -28,15 +28,7 @@ const loader = new Loader({
 });
 
 const searches = useSearchStore();
-
-// const props = defineProps({
-//   map: {
-//     type: Object as PropType<google.maps.Map | null>,
-//     required: true,
-//   },
-// });
 const mapRef: Ref<HTMLDivElement | null> = ref(null);
-// const { map } = toRefs(props);
 const map: Ref<google.maps.Map | null> = ref(null);
 
 onMounted(async () => {
@@ -74,14 +66,6 @@ onMounted(async () => {
     map: map.value,
   });
 
-  // google.maps.event.addListener(map.value, "click", (event: any) => {
-  //   if (!map.value) return;
-  //   addMarker(event.latLng, map.value);
-  // });
-
-  // autocompleteService = new google.maps.places.AutocompleteService();
-  // placesService = new google.maps.places.PlacesService(map);
-
   autocomplete.addListener("place_changed", () => {
     infowindow.close();
     marker.setVisible(false);
@@ -104,20 +88,18 @@ onMounted(async () => {
       map.value.setZoom(17);
     }
 
-    // marker.setPosition(place.geometry.location);
-    // marker.setVisible(true);
+    const id = searches.index.toString().padStart(2, "0");
     addMarker(place.geometry.location.toJSON(), map.value);
 
-    // if (infowindowContent.value) {
-    //   console.log(infowindowContent.value.children);
-    //   infowindowContent.value.children["place-name"].textContent = place.name;
-    //   infowindowContent.value.children["place-address"].textContent =
-    //     place.formatted_address;
-    // }
-    // infowindow.open(map.value, m);
-
     if (place.name) {
-      searches.addSearch(place.name);
+      searches.addSearch({
+        id: id,
+        gid: place.place_id,
+        name: place.name,
+        address: place.formatted_address,
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      });
     }
   });
 });
@@ -132,7 +114,7 @@ function addMarker(location: google.maps.LatLngLiteral, map: google.maps.Map) {
   // from the array of alphabetical characters.
   const marker = new google.maps.Marker({
     position: location,
-    label: (searches.searches.length + 1).toString(),
+    label: searches.index.toString().padStart(2, "0"),
     map: map,
   });
 
@@ -142,4 +124,13 @@ function addMarker(location: google.maps.LatLngLiteral, map: google.maps.Map) {
 requestAnimationFrame(animate);
 defineExpose({ map, addMarker });
 </script>
-<style lang=""></style>
+<style lang="scss" scoped>
+input {
+  box-sizing: border-box;
+  min-width: min(100%, 300px);
+  border-radius: 3px;
+  padding: 0.5rem 0.5rem;
+  border: 2px solid #00a0af;
+  outline: none;
+}
+</style>

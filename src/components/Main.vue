@@ -1,9 +1,11 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
-      <div>History: {{ JSON.stringify(searches.searches, null, 2) }}</div>
-      <v-btn :loading="isLoading" @click.stop="getLocation">Get Location</v-btn>
+      <v-btn id="btn-get-current" :loading="isLoading" @click.stop="getLocation"
+        >Get Current Location</v-btn
+      >
       <GoogleMap ref="mapRef" />
+      <Table :key="key" :searches="searches" />
     </v-responsive>
   </v-container>
 </template>
@@ -11,16 +13,22 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import GoogleMap from "./GoogleMap.vue";
-import { onMounted } from "vue";
-import { useSearchStore } from "@/store/app";
+import { useSearchStore } from "@/store/search";
+import Table from "@/components/Table.vue";
+import { computed } from "vue";
 
 const isLoading = ref(false);
 const currentLocation = ref({ lat: 0, lng: 0 });
 const mapRef = ref<null | InstanceType<typeof GoogleMap>>(null);
 
-const searches = useSearchStore();
+const search = useSearchStore();
+const searches = computed(() => search.all);
+const key = ref(0);
 
-onMounted(() => {});
+// Workaround to force re-render Table component
+search.$subscribe((state) => {
+  key.value = Math.random();
+});
 
 // // Get place predictions
 // const getPlacePredictions = async (search: string) => {
@@ -74,3 +82,11 @@ const getLocation = () => {
   }
 };
 </script>
+
+<style scoped>
+#btn-get-current {
+  background: #f68c34;
+  color: white;
+  min-width: min(100%, 300px);
+}
+</style>
