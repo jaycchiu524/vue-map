@@ -10,6 +10,7 @@ export const useSearchStore = defineStore({
   }),
   getters: {
     all: (state) => state.search,
+    latest: (state) => state.search.slice(-1)[0],
   },
   actions: {
     addSearch(search: LocationData) {
