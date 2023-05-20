@@ -79,6 +79,9 @@ const getLocation = () => {
       addMarker(currentLocation.value, map);
       isLoading.value = false;
     });
+  } else {
+    alert("Geolocation is not supported by this browser.");
+    isLoading.value = false;
   }
 };
 </script>

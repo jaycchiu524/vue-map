@@ -107,6 +107,10 @@
   import { ref } from "vue";
   import { LocationData } from "./types";
 
+  interface InputEvent extends Event {
+    target: HTMLInputElement;
+  }
+
   const INITIAL_PAGE_INDEX = 0;
 
   const props = defineProps({
@@ -119,7 +123,7 @@
   const columnHelper = createColumnHelper<LocationData>();
   const goToPageNumber = ref(INITIAL_PAGE_INDEX + 1);
   const pageSizes = [10, 20, 30, 40, 50];
-  const data = ref(props.searches);
+  // const data = ref(props.searches);
 
   const columns = [
     columnHelper.group({
@@ -129,10 +133,12 @@
           header: () => "ID",
           footer: (props) => props.column.id,
         }),
-        columnHelper.accessor("gid", {
-          header: () => "Place ID",
-          footer: (props) => props.column.id,
-        }),
+        // columnHelper.accessor("gid", {
+        //   header: () => "Place ID",
+        //   footer: (props) => props.column.id,
+        //   enableHiding: true,
+        //   cell: (info) => info.getValue(),
+        // }),
         columnHelper.accessor("name", {
           header: () => "Name",
           cell: (info) => info.getValue(),
@@ -166,14 +172,26 @@
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  function handleGoToPage(e: any) {
-    const page = e.target.value ? Number(e.target.value) - 1 : 0;
+  const handleGoToPage = (e: Event) => {
+    const event = e as InputEvent;
+    if (!event.target || !event.target?.value) {
+      return;
+    }
+    const page = event.target.value ? Number(event.target.value) - 1 : 0;
     goToPageNumber.value = page + 1;
     table.setPageIndex(page);
-  }
+  };
 
-  function handlePageSizeChange(e: any) {
-    table.setPageSize(Number(e.target.value));
-  }
+  const handlePageSizeChange = (e: Event) => {
+    const event = e as InputEvent;
+    if (!event.target || !event.target?.value) {
+      return;
+    }
+    table.setPageSize(Number(event.target.value));
+  };
 </script>
-<style lang=""></style>
+<style lang="scss" scoped>
+  tbody {
+    text-align: start;
+  }
+</style>
