@@ -14,7 +14,7 @@
 import { ref } from "vue";
 import GoogleMap from "./GoogleMap.vue";
 import { useSearchStore } from "@/store/search";
-import Table from "@/components/Table.vue";
+import Table from "@/components/Table/Table.vue";
 import { computed } from "vue";
 
 const isLoading = ref(false);
