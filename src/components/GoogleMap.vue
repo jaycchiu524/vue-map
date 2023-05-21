@@ -1,9 +1,12 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
+      <div class="mb-4" ref="mapRef" style="height: 50vh" />
       <input ref="input" label="Search Places" />
-      <CurrentLocationCard />
-      <div ref="mapRef" style="height: 50vh" />
+      <CurrentLocationCard
+        v-if="!!searches.current"
+        :location="searches.current"
+      />
     </v-responsive>
   </v-container>
 </template>
@@ -26,6 +29,7 @@ const loader = new Loader({
 const searches = useSearchStore();
 const mapRef: Ref<HTMLDivElement | null> = ref(null);
 const map: Ref<google.maps.Map | null> = ref(null);
+const marker: Ref<google.maps.Marker | null> = ref(null);
 
 onMounted(async () => {
   const google = await loader.load();
@@ -56,7 +60,7 @@ onMounted(async () => {
     input.value as HTMLInputElement
   );
 
-  const marker = new google.maps.Marker({
+  marker.value = new google.maps.Marker({
     position: toronto,
     title: "Toronto",
     map: map.value,
@@ -64,7 +68,7 @@ onMounted(async () => {
 
   autocomplete.addListener("place_changed", () => {
     infowindow.close();
-    marker.setVisible(false);
+    marker.value!.setVisible(false);
 
     const place = autocomplete.getPlace();
 
@@ -88,7 +92,7 @@ onMounted(async () => {
     addMarker(place.geometry.location.toJSON(), map.value);
 
     if (place.name) {
-      searches.addSearch({
+      searches.add({
         id: id,
         gid: place.place_id,
         name: place.name,
@@ -118,7 +122,7 @@ function addMarker(location: google.maps.LatLngLiteral, map: google.maps.Map) {
 }
 
 requestAnimationFrame(animate);
-defineExpose({ map, addMarker });
+defineExpose({ map, marker, addMarker });
 </script>
 <style lang="scss" scoped>
 input {

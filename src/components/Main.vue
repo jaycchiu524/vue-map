@@ -1,10 +1,14 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
-      <v-btn id="btn-get-current" :loading="isLoading" @click.stop="getLocation"
+      <GoogleMap ref="mapRef" />
+      <v-btn
+        id="btn-get-current"
+        :loading="isLoading"
+        prepend-icon="mdi-search-web"
+        @click.prevent="getLocation"
         >Get Current Location</v-btn
       >
-      <GoogleMap ref="mapRef" />
       <Table :key="key" :searches="searches" />
     </v-responsive>
   </v-container>
@@ -66,6 +70,10 @@ search.$subscribe((state) => {
 
 const getLocation = () => {
   isLoading.value = true;
+  const marker = mapRef.value?.marker;
+  if (!marker) return;
+  marker.setVisible(false);
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition((position) => {
       currentLocation.value = {
@@ -73,15 +81,18 @@ const getLocation = () => {
         lng: position.coords.longitude,
       };
       const map = mapRef.value?.map;
-      const addMarker = mapRef.value?.addMarker;
-      if (!map || !addMarker) return;
+
+      marker.setPosition(currentLocation.value);
+      marker.setVisible(true);
+
+      if (!map) return;
       map.panTo(currentLocation.value);
-      addMarker(currentLocation.value, map);
       isLoading.value = false;
     });
   } else {
     alert("Geolocation is not supported by this browser.");
     isLoading.value = false;
+    marker.setVisible(true);
   }
 };
 </script>

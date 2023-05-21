@@ -1,8 +1,9 @@
 <template>
   <v-tooltip :text="text" location="end">
     <template v-slot:activator="{ props }">
-      <v-icon
+      <v-btn
         v-bind="props"
+        variant="text"
         icon="mdi-delete"
         class="cursor-pointer"
         color="red darken-1"
