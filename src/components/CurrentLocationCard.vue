@@ -48,6 +48,7 @@ const getTimezone = async (lat: number, lng: number) => {
       },
     }
   );
+
   return response.data;
 };
 
@@ -65,7 +66,7 @@ watch(latest, async (state) => {
 
 function getUTCTime() {
   const date = new Date();
-  return format(date, "yyyy-MM-dd HH:mm:ss");
+  return format(utcToZonedTime(date, "UTC"), "yyyy-MM-dd HH:mm:ss");
 }
 function getLocalTime(timezone = "America/Toronto") {
   const date = new Date();
