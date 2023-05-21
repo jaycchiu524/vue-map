@@ -6,16 +6,20 @@ export const useSearchStore = defineStore({
   id: "search",
   state: () => ({
     search: [] as LocationData[],
+    current: null as LocationData | null,
     index: 1,
   }),
   getters: {
     all: (state) => state.search,
-    latest: (state) => state.search.slice(-1)[0],
   },
   actions: {
-    addSearch(search: LocationData) {
+    add(search: LocationData) {
       this.search.push(search);
+      this.current = search;
       this.index++;
+    },
+    setCurrent(search: LocationData) {
+      this.current = search;
     },
   },
 });

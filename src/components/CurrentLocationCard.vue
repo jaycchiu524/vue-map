@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="!!latest" :title="latest.name" :subtitle="latest.address">
+  <v-card v-if="!!location" :title="location.name" :subtitle="location.address">
     <v-card-text>
       <div>
         <span class="font-weight-bold">Local Time: </span>
@@ -17,11 +17,11 @@
       </div>
       <div>
         <span class="font-weight-bold">Latitude: </span>
-        <span>{{ latest.lat }}</span>
+        <span>{{ location.lat }}</span>
       </div>
       <div>
         <span class="font-weight-bold">Longitude: </span>
-        <span>{{ latest.lng }}</span>
+        <span>{{ location.lng }}</span>
       </div>
     </v-card-text>
   </v-card>
@@ -29,8 +29,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { utcToZonedTime, format } from "date-fns-tz";
-import { useSearchStore } from "@/store/search";
 import axios from "axios";
+import { LocationData } from "./types";
+import { PropType } from "vue";
 
 const getTimezone = async (lat: number, lng: number) => {
   const API_KEY = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
@@ -52,15 +53,20 @@ const getTimezone = async (lat: number, lng: number) => {
   return response.data;
 };
 
+const props = defineProps({
+  location: {
+    type: Object as PropType<LocationData>,
+    required: true,
+  },
+});
+
 const utc = ref(getUTCTime());
 const local = ref(getLocalTime());
-const search = useSearchStore();
-const latest = computed(() => search.latest);
 const timezone = ref("");
+const location = computed(() => props.location);
 
-watch(latest, async (state) => {
-  const { lat, lng } = state;
-  const tz = await getTimezone(lat!, lng!);
+watch(location, async (state) => {
+  const tz = await getTimezone(state?.lat!, state?.lng!);
   timezone.value = tz.timeZoneId;
 });
 
