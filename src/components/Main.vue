@@ -5,7 +5,7 @@
       <v-btn
         id="btn-get-current"
         :loading="isLoading"
-        prepend-icon="mdi-search-web"
+        prepend-icon="mdi-map-marker"
         @click.prevent="getLocation"
         >Get Current Location</v-btn
       >

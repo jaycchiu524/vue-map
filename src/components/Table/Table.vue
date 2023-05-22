@@ -1,5 +1,17 @@
 <template>
-  <v-table :key="props.searches.length">
+  <v-table id="table" :key="props.searches.length" :hover="true">
+    <!-- Meesage if data is empty -->
+    <template v-if="props.searches.length === 0">
+      <tbody>
+        <tr>
+          <td class="text-center" colspan="100%">
+            <v-alert prepend-icon="mdi-map-search-outline" class="mx-auto">
+              No data
+            </v-alert>
+          </td>
+        </tr>
+      </tbody>
+    </template>
     <thead>
       <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
         <th
@@ -26,7 +38,19 @@
       </tr>
     </tbody>
   </v-table>
-  <div>
+  <div class="mb-4">
+    <div class="flex items-center gap-2">
+      <v-btn
+        class="border rounded p-1 mx-1"
+        color="error"
+        @click="bulkDelete"
+        :disabled="selected.length == 0"
+      >
+        Delete Selected
+      </v-btn>
+    </div>
+  </div>
+  <div class="mb-4">
     <div class="flex items-center gap-2">
       <v-btn
         class="border rounded p-1 mx-1"
@@ -110,6 +134,7 @@ import Checkbox from "./Checkbox.vue";
 import Delete from "./Delete.vue";
 import { Ref } from "vue";
 import { computed } from "vue";
+import { useSearchStore } from "@/store/search";
 interface InputEvent extends Event {
   target: HTMLInputElement;
 }
@@ -124,25 +149,33 @@ const props = defineProps({
 });
 
 const data = computed(() => props.searches);
+const search = useSearchStore();
 
 const columnHelper = createColumnHelper<LocationData>();
 const goToPageNumber = ref(INITIAL_PAGE_INDEX + 1);
 const pageSizes = [10, 20, 30, 40, 50];
 
-const selected: Ref<number[]> = ref([]);
+const selected: Ref<string[]> = ref([]);
+const bulkDelete = () => {
+  confirm("Are you sure you want to delete these searches?");
+  console.log(selected.value);
+  search.bulkRemove(selected.value);
+  selected.value = [];
+};
+
 const columns = [
   columnHelper.display({
     header: () => "#",
     id: "selected",
     cell: (info) => {
       return h(Checkbox, {
-        modelValue: selected.value.includes(info.row.index),
+        modelValue: selected.value.includes(info.row.original.id),
         "onUpdate:modelValue": (value: boolean) => {
           if (value) {
-            selected.value.push(info.row.index);
+            selected.value.push(info.row.original.id);
           } else {
             selected.value = selected.value.filter(
-              (item) => item !== info.row.index
+              (item) => item !== info.row.original.id
             );
           }
         },
@@ -156,15 +189,8 @@ const columns = [
         header: () => "ID",
         footer: (props) => props.column.id,
       }),
-      // columnHelper.accessor("gid", {
-      //   header: () => "Place ID",
-      //   footer: (props) => props.column.id,
-      //   enableHiding: true,
-      //   cell: (info) => info.getValue(),
-      // }),
       columnHelper.accessor("name", {
         header: () => "Name",
-        cell: (info) => info.getValue(),
         footer: (props) => props.column.id,
       }),
       columnHelper.accessor("address", {
@@ -193,7 +219,8 @@ const columns = [
       return h(Delete, {
         row: info.row,
         onDelete: () => {
-          console.log("delete", info.row.index);
+          confirm("Are you sure you want to delete this search?") &&
+            search.remove(info.row.original.id);
         },
       });
     },
@@ -226,6 +253,10 @@ const handlePageSizeChange = (e: Event) => {
 };
 </script>
 <style lang="scss" scoped>
+#table {
+  width: 100%;
+  min-height: 400px;
+}
 tbody {
   text-align: start;
 }

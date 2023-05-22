@@ -21,5 +21,13 @@ export const useSearchStore = defineStore({
     setCurrent(search: LocationData) {
       this.current = search;
     },
+    remove(id: LocationData["id"]) {
+      this.search = this.search.filter((search) => search.id !== id);
+    },
+    bulkRemove(ids: LocationData["id"][]) {
+      this.search = this.search.filter(
+        (search) => ids.includes(search.id) === false
+      );
+    },
   },
 });
