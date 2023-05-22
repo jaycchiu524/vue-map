@@ -16,12 +16,8 @@
         <span>{{ timezone }}</span>
       </div>
       <div>
-        <span class="font-weight-bold">Latitude: </span>
-        <span>{{ location.lat }}</span>
-      </div>
-      <div>
-        <span class="font-weight-bold">Longitude: </span>
-        <span>{{ location.lng }}</span>
+        <span class="font-weight-bold">Geolocation: </span>
+        <span>{{ `${location.lat}, ${location.lng}` }}</span>
       </div>
     </v-card-text>
   </v-card>

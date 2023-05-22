@@ -2,7 +2,9 @@
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
       <div class="mb-4" ref="mapRef" style="height: 50vh" />
+
       <input ref="input" label="Search Places" />
+
       <CurrentLocationCard
         v-if="!!searches.current"
         :location="searches.current"
@@ -30,6 +32,55 @@ const searches = useSearchStore();
 const mapRef: Ref<HTMLDivElement | null> = ref(null);
 const map: Ref<google.maps.Map | null> = ref(null);
 const marker: Ref<google.maps.Marker | null> = ref(null);
+const isFetching = ref(false);
+const infowindow: Ref<google.maps.InfoWindow | null> = ref(null);
+const autocomplete: Ref<google.maps.places.Autocomplete | null> = ref(null);
+const handleSearch = () => {
+  if (!autocomplete.value) return;
+  if (!infowindow.value) return;
+  isFetching.value = true;
+  infowindow.value.close();
+  marker.value!.setVisible(false);
+
+  const place = autocomplete.value.getPlace();
+
+  if (!place.geometry || !place.geometry.location) {
+    // User entered the name of a Place that was not suggested and
+    // pressed the Enter key, or the Place Details request failed.
+    window.alert("No details available for input: '" + place.name + "'");
+    isFetching.value = false;
+    return;
+  }
+
+  // If the place has a geometry, then present it on a map.
+  if (!map.value) {
+    isFetching.value = false;
+    return;
+  }
+
+  if (place.geometry.viewport) {
+    map.value.fitBounds(place.geometry.viewport);
+  } else {
+    map.value.setCenter(place.geometry.location);
+    map.value.setZoom(17);
+  }
+
+  const id = searches.index.toString().padStart(2, "0");
+  addMarker(place.geometry.location.toJSON(), map.value);
+
+  if (place.name) {
+    searches.add({
+      id: id,
+      gid: place.place_id,
+      name: place.name,
+      address: place.formatted_address,
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    });
+  }
+
+  isFetching.value = false;
+};
 
 onMounted(async () => {
   const google = await loader.load();
@@ -55,8 +106,8 @@ onMounted(async () => {
     })
     .start(); // Start the tween immediately.
 
-  const infowindow = new google.maps.InfoWindow();
-  const autocomplete = new google.maps.places.Autocomplete(
+  infowindow.value = new google.maps.InfoWindow();
+  autocomplete.value = new google.maps.places.Autocomplete(
     input.value as HTMLInputElement
   );
 
@@ -66,42 +117,7 @@ onMounted(async () => {
     map: map.value,
   });
 
-  autocomplete.addListener("place_changed", () => {
-    infowindow.close();
-    marker.value!.setVisible(false);
-
-    const place = autocomplete.getPlace();
-
-    if (!place.geometry || !place.geometry.location) {
-      // User entered the name of a Place that was not suggested and
-      // pressed the Enter key, or the Place Details request failed.
-      window.alert("No details available for input: '" + place.name + "'");
-      return;
-    }
-
-    // If the place has a geometry, then present it on a map.
-    if (!map.value) return;
-    if (place.geometry.viewport) {
-      map.value.fitBounds(place.geometry.viewport);
-    } else {
-      map.value.setCenter(place.geometry.location);
-      map.value.setZoom(17);
-    }
-
-    const id = searches.index.toString().padStart(2, "0");
-    addMarker(place.geometry.location.toJSON(), map.value);
-
-    if (place.name) {
-      searches.add({
-        id: id,
-        gid: place.place_id,
-        name: place.name,
-        address: place.formatted_address,
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-      });
-    }
-  });
+  autocomplete.value.addListener("place_changed", handleSearch);
 });
 
 function animate(time: number) {
@@ -127,7 +143,7 @@ defineExpose({ map, marker, addMarker });
 <style lang="scss" scoped>
 input {
   box-sizing: border-box;
-  min-width: min(100%, 300px);
+  min-width: min(100%, 500px);
   padding: 0.5rem 0.5rem;
   margin-bottom: 1rem;
   border-radius: 3px;
