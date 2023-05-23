@@ -36,6 +36,13 @@ export const useSearchStore = defineStore({
       this.search = this.search.filter(
         (search) => ids.includes(search.id) === false,
       )
+
+      for (const [key, value] of Object.entries(this.markers)) {
+        if (ids.includes(key)) {
+          value.setMap(null)
+          this.removeMarker(key)
+        }
+      }
     },
     addMarker(marker: google.maps.Marker, id: LocationData['id']) {
       this.markers[id] = marker
