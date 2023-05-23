@@ -1,7 +1,7 @@
 <template>
-  <v-table id="table" :key="props.searches.length" :hover="true">
+  <v-table id="table" :key="props.search.length" :hover="true">
     <!-- Meesage if data is empty -->
-    <template v-if="props.searches.length === 0">
+    <template v-if="props.search.length === 0">
       <tbody>
         <tr>
           <td class="text-center" colspan="100%">
@@ -117,14 +117,14 @@ import {
   // ColumnDef,
   useVueTable,
   FlexRender,
+  Table,
 } from '@tanstack/vue-table'
-import { h, ref } from 'vue'
+import { h, ref, Ref } from 'vue'
 import { LocationData } from '../types'
 import Checkbox from './Checkbox.vue'
 import Delete from './Delete.vue'
-import { Ref } from 'vue'
-import { computed } from 'vue'
 import { useSearchStore } from '@/store/search'
+import { watch } from 'vue'
 interface InputEvent extends Event {
   target: HTMLInputElement
 }
@@ -132,14 +132,26 @@ interface InputEvent extends Event {
 const INITIAL_PAGE_INDEX = 0
 
 const props = defineProps({
-  searches: {
+  search: {
     type: Array as () => LocationData[],
     required: true,
   },
 })
 
-const data = computed(() => props.searches)
 const search = useSearchStore()
+
+watch(
+  () => props.search,
+  (state) => {
+    table.value = useVueTable({
+      data: props.search,
+      columns,
+      getCoreRowModel: getCoreRowModel(),
+      getPaginationRowModel: getPaginationRowModel(),
+    })
+  },
+  { deep: true },
+)
 
 const columnHelper = createColumnHelper<LocationData>()
 const goToPageNumber = ref(INITIAL_PAGE_INDEX + 1)
@@ -217,12 +229,14 @@ const columns = [
   }),
 ]
 
-const table = useVueTable({
-  data: data.value,
-  columns,
-  getCoreRowModel: getCoreRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-})
+const table: Ref<Table<LocationData>> = ref(
+  useVueTable({
+    data: props.search,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  }),
+)
 
 const handleGoToPage = (e: Event) => {
   const event = e as InputEvent
@@ -231,7 +245,7 @@ const handleGoToPage = (e: Event) => {
   }
   const page = event.target.value ? Number(event.target.value) - 1 : 0
   goToPageNumber.value = page + 1
-  table.setPageIndex(page)
+  table.value.setPageIndex(page)
 }
 
 const handlePageSizeChange = (e: Event) => {
@@ -239,7 +253,7 @@ const handlePageSizeChange = (e: Event) => {
   if (!event.target || !event.target?.value) {
     return
   }
-  table.setPageSize(Number(event.target.value))
+  table.value.setPageSize(Number(event.target.value))
 }
 </script>
 <style lang="scss" scoped>
