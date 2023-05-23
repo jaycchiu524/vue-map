@@ -17,13 +17,11 @@
         <th
           v-for="header in headerGroup.headers"
           :key="header.id"
-          :colSpan="header.colSpan"
-        >
+          :colSpan="header.colSpan">
           <FlexRender
             v-if="!header.isPlaceholder"
             :render="header.column.columnDef.header"
-            :props="header.getContext()"
-          />
+            :props="header.getContext()" />
         </th>
       </tr>
     </thead>
@@ -32,8 +30,7 @@
         <td v-for="cell in row.getVisibleCells()" :key="cell.id">
           <FlexRender
             :render="cell.column.columnDef.cell"
-            :props="cell.getContext()"
-          />
+            :props="cell.getContext()" />
         </td>
       </tr>
     </tbody>
@@ -44,8 +41,7 @@
         class="border rounded p-1 mx-1"
         color="error"
         @click="bulkDelete"
-        :disabled="selected.length == 0"
-      >
+        :disabled="selected.length == 0">
         Delete Selected
       </v-btn>
     </div>
@@ -55,29 +51,25 @@
       <v-btn
         class="border rounded p-1 mx-1"
         @click="() => table.setPageIndex(0)"
-        :disabled="!table.getCanPreviousPage()"
-      >
+        :disabled="!table.getCanPreviousPage()">
         First Page
       </v-btn>
       <v-btn
         class="border rounded p-1 mx-1"
         @click="() => table.previousPage()"
-        :disabled="!table.getCanPreviousPage()"
-      >
+        :disabled="!table.getCanPreviousPage()">
         Previous
       </v-btn>
       <v-btn
         class="border rounded p-1 mx-1"
         @click="() => table.nextPage()"
-        :disabled="!table.getCanNextPage()"
-      >
+        :disabled="!table.getCanNextPage()">
         Next
       </v-btn>
       <v-btn
         class="border rounded p-1 mx-1"
         @click="() => table.setPageIndex(table.getPageCount() - 1)"
-        :disabled="!table.getCanNextPage()"
-      >
+        :disabled="!table.getCanNextPage()">
         Last Page
       </v-btn>
       <span class="flex items-center gap-1">
@@ -93,13 +85,11 @@
           type="number"
           :value="goToPageNumber"
           @change="handleGoToPage"
-          class="border p-1 rounded w-16"
-        />
+          class="border p-1 rounded w-16" />
       </span>
       <select
         :value="table.getState().pagination.pageSize"
-        @change="handlePageSizeChange"
-      >
+        @change="handlePageSizeChange">
         <option :key="pageSize" :value="pageSize" v-for="pageSize in pageSizes">
           Show {{ pageSize }}
         </option>
@@ -127,130 +117,130 @@ import {
   // ColumnDef,
   useVueTable,
   FlexRender,
-} from "@tanstack/vue-table";
-import { h, ref } from "vue";
-import { LocationData } from "../types";
-import Checkbox from "./Checkbox.vue";
-import Delete from "./Delete.vue";
-import { Ref } from "vue";
-import { computed } from "vue";
-import { useSearchStore } from "@/store/search";
+} from '@tanstack/vue-table'
+import { h, ref } from 'vue'
+import { LocationData } from '../types'
+import Checkbox from './Checkbox.vue'
+import Delete from './Delete.vue'
+import { Ref } from 'vue'
+import { computed } from 'vue'
+import { useSearchStore } from '@/store/search'
 interface InputEvent extends Event {
-  target: HTMLInputElement;
+  target: HTMLInputElement
 }
 
-const INITIAL_PAGE_INDEX = 0;
+const INITIAL_PAGE_INDEX = 0
 
 const props = defineProps({
   searches: {
     type: Array as () => LocationData[],
     required: true,
   },
-});
+})
 
-const data = computed(() => props.searches);
-const search = useSearchStore();
+const data = computed(() => props.searches)
+const search = useSearchStore()
 
-const columnHelper = createColumnHelper<LocationData>();
-const goToPageNumber = ref(INITIAL_PAGE_INDEX + 1);
-const pageSizes = [10, 20, 30, 40, 50];
+const columnHelper = createColumnHelper<LocationData>()
+const goToPageNumber = ref(INITIAL_PAGE_INDEX + 1)
+const pageSizes = [10, 20, 30, 40, 50]
 
-const selected: Ref<string[]> = ref([]);
+const selected: Ref<string[]> = ref([])
 const bulkDelete = () => {
-  confirm("Are you sure you want to delete these searches?");
-  console.log(selected.value);
-  search.bulkRemove(selected.value);
-  selected.value = [];
-};
+  confirm('Are you sure you want to delete these searches?')
+  console.log(selected.value)
+  search.bulkRemove(selected.value)
+  selected.value = []
+}
 
 const columns = [
   columnHelper.display({
-    header: () => "#",
-    id: "selected",
+    header: () => '#',
+    id: 'selected',
     cell: (info) => {
       return h(Checkbox, {
         modelValue: selected.value.includes(info.row.original.id),
-        "onUpdate:modelValue": (value: boolean) => {
+        'onUpdate:modelValue': (value: boolean) => {
           if (value) {
-            selected.value.push(info.row.original.id);
+            selected.value.push(info.row.original.id)
           } else {
             selected.value = selected.value.filter(
-              (item) => item !== info.row.original.id
-            );
+              (item) => item !== info.row.original.id,
+            )
           }
         },
-      });
+      })
     },
   }),
   columnHelper.group({
-    header: "Info",
+    header: 'Info',
     columns: [
-      columnHelper.accessor("id", {
-        header: () => "ID",
+      columnHelper.accessor('id', {
+        header: () => 'ID',
         footer: (props) => props.column.id,
       }),
-      columnHelper.accessor("name", {
-        header: () => "Name",
+      columnHelper.accessor('name', {
+        header: () => 'Name',
         footer: (props) => props.column.id,
       }),
-      columnHelper.accessor("address", {
-        header: () => "Address",
+      columnHelper.accessor('address', {
+        header: () => 'Address',
         footer: (props) => props.column.id,
       }),
     ],
   }),
   columnHelper.group({
-    header: "Geolocation",
+    header: 'Geolocation',
     columns: [
-      columnHelper.accessor("lat", {
-        header: () => "Latitude",
+      columnHelper.accessor('lat', {
+        header: () => 'Latitude',
         footer: (props) => props.column.id,
       }),
-      columnHelper.accessor("lng", {
-        header: "Longitude",
+      columnHelper.accessor('lng', {
+        header: 'Longitude',
         footer: (props) => props.column.id,
       }),
     ],
   }),
   columnHelper.display({
-    header: () => "Actions",
-    id: "actions",
+    header: () => 'Actions',
+    id: 'actions',
     cell: (info) => {
       return h(Delete, {
         row: info.row,
         onDelete: () => {
-          confirm("Are you sure you want to delete this search?") &&
-            search.remove(info.row.original.id);
+          confirm('Are you sure you want to delete this search?') &&
+            search.remove(info.row.original.id)
         },
-      });
+      })
     },
   }),
-];
+]
 
 const table = useVueTable({
   data: data.value,
   columns,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
-});
+})
 
 const handleGoToPage = (e: Event) => {
-  const event = e as InputEvent;
+  const event = e as InputEvent
   if (!event.target || !event.target?.value) {
-    return;
+    return
   }
-  const page = event.target.value ? Number(event.target.value) - 1 : 0;
-  goToPageNumber.value = page + 1;
-  table.setPageIndex(page);
-};
+  const page = event.target.value ? Number(event.target.value) - 1 : 0
+  goToPageNumber.value = page + 1
+  table.setPageIndex(page)
+}
 
 const handlePageSizeChange = (e: Event) => {
-  const event = e as InputEvent;
+  const event = e as InputEvent
   if (!event.target || !event.target?.value) {
-    return;
+    return
   }
-  table.setPageSize(Number(event.target.value));
-};
+  table.setPageSize(Number(event.target.value))
+}
 </script>
 <style lang="scss" scoped>
 #table {

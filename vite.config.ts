@@ -16,7 +16,7 @@ export default defineConfig({
     vuetify({
       autoImport: true,
       styles: {
-        configFile: 'src/styles/app.css',
+        configFile: 'src/styles/settings.scss',
       },
     }),
   ],
