@@ -35,7 +35,6 @@ input {
   box-sizing: border-box;
   min-width: min(100%, 500px);
   padding: 0.5rem 0.5rem;
-  margin-bottom: 1rem;
   border-radius: 3px;
   border: 2px solid #00a0af;
   outline: none;
