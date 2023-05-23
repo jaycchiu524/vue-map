@@ -1,9 +1,9 @@
 // Utilities
-import { LocationData } from "@/components/types";
-import { defineStore } from "pinia";
+import { LocationData } from '@/components/types'
+import { defineStore } from 'pinia'
 
 export const useSearchStore = defineStore({
-  id: "search",
+  id: 'search',
   state: () => ({
     search: [] as LocationData[],
     current: null as LocationData | null,
@@ -14,20 +14,20 @@ export const useSearchStore = defineStore({
   },
   actions: {
     add(search: LocationData) {
-      this.search.push(search);
-      this.current = search;
-      this.index++;
+      this.search.push(search)
+      this.current = search
+      this.index++
     },
     setCurrent(search: LocationData) {
-      this.current = search;
+      this.current = search
     },
-    remove(id: LocationData["id"]) {
-      this.search = this.search.filter((search) => search.id !== id);
+    remove(id: LocationData['id']) {
+      this.search = this.search.filter((search) => search.id !== id)
     },
-    bulkRemove(ids: LocationData["id"][]) {
+    bulkRemove(ids: LocationData['id'][]) {
       this.search = this.search.filter(
-        (search) => ids.includes(search.id) === false
-      );
+        (search) => ids.includes(search.id) === false,
+      )
     },
   },
-});
+})

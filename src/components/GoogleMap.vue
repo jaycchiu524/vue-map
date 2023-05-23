@@ -7,66 +7,65 @@
 
       <CurrentLocationCard
         v-if="!!searches.current"
-        :location="searches.current"
-      />
+        :location="searches.current" />
     </v-responsive>
   </v-container>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, Ref } from "vue";
-import { Loader } from "@googlemaps/js-api-loader";
-import { Easing, Tween, update } from "@tweenjs/tween.js";
-import { useSearchStore } from "@/store/search";
-import CurrentLocationCard from "./CurrentLocationCard.vue";
+import { ref, onMounted, Ref } from 'vue'
+import { Loader } from '@googlemaps/js-api-loader'
+import { Easing, Tween, update } from '@tweenjs/tween.js'
+import { useSearchStore } from '@/store/search'
+import CurrentLocationCard from './CurrentLocationCard.vue'
 
-const input: Ref<HTMLInputElement | null> = ref(null);
-const apiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
+const input: Ref<HTMLInputElement | null> = ref(null)
+const apiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY
 const loader = new Loader({
   apiKey,
-  version: "weekly",
-  libraries: ["places"],
-});
+  version: 'weekly',
+  libraries: ['places'],
+})
 
-const searches = useSearchStore();
-const mapRef: Ref<HTMLDivElement | null> = ref(null);
-const map: Ref<google.maps.Map | null> = ref(null);
-const marker: Ref<google.maps.Marker | null> = ref(null);
-const isFetching = ref(false);
-const infowindow: Ref<google.maps.InfoWindow | null> = ref(null);
-const autocomplete: Ref<google.maps.places.Autocomplete | null> = ref(null);
+const searches = useSearchStore()
+const mapRef: Ref<HTMLDivElement | null> = ref(null)
+const map: Ref<google.maps.Map | null> = ref(null)
+const marker: Ref<google.maps.Marker | null> = ref(null)
+const isFetching = ref(false)
+const infowindow: Ref<google.maps.InfoWindow | null> = ref(null)
+const autocomplete: Ref<google.maps.places.Autocomplete | null> = ref(null)
 const handleSearch = () => {
-  if (!autocomplete.value) return;
-  if (!infowindow.value) return;
-  isFetching.value = true;
-  infowindow.value.close();
-  marker.value!.setVisible(false);
+  if (!autocomplete.value) return
+  if (!infowindow.value) return
+  isFetching.value = true
+  infowindow.value.close()
+  marker.value!.setVisible(false)
 
-  const place = autocomplete.value.getPlace();
+  const place = autocomplete.value.getPlace()
 
   if (!place.geometry || !place.geometry.location) {
     // User entered the name of a Place that was not suggested and
     // pressed the Enter key, or the Place Details request failed.
-    window.alert("No details available for input: '" + place.name + "'");
-    isFetching.value = false;
-    return;
+    window.alert("No details available for input: '" + place.name + "'")
+    isFetching.value = false
+    return
   }
 
   // If the place has a geometry, then present it on a map.
   if (!map.value) {
-    isFetching.value = false;
-    return;
+    isFetching.value = false
+    return
   }
 
   if (place.geometry.viewport) {
-    map.value.fitBounds(place.geometry.viewport);
+    map.value.fitBounds(place.geometry.viewport)
   } else {
-    map.value.setCenter(place.geometry.location);
-    map.value.setZoom(17);
+    map.value.setCenter(place.geometry.location)
+    map.value.setZoom(17)
   }
 
-  const id = searches.index.toString().padStart(2, "0");
-  addMarker(place.geometry.location.toJSON(), map.value);
+  const id = searches.index.toString().padStart(2, '0')
+  addMarker(place.geometry.location.toJSON(), map.value)
 
   if (place.name) {
     searches.add({
@@ -76,53 +75,53 @@ const handleSearch = () => {
       address: place.formatted_address,
       lat: place.geometry.location.lat(),
       lng: place.geometry.location.lng(),
-    });
+    })
   }
 
-  isFetching.value = false;
-};
+  isFetching.value = false
+}
 
 onMounted(async () => {
-  const google = await loader.load();
-  const toronto = new google.maps.LatLng(43.6532, -79.3832);
+  const google = await loader.load()
+  const toronto = new google.maps.LatLng(43.6532, -79.3832)
   const cameraOptions: google.maps.CameraOptions = {
     tilt: 0,
     heading: 0,
     zoom: 3,
     center: toronto,
-  };
+  }
   map.value = new google.maps.Map(mapRef.value! as HTMLElement, {
     ...cameraOptions,
-  });
+  })
 
-  if (!map.value) return;
+  if (!map.value) return
 
   new Tween(cameraOptions) // Create a new tween that modifies 'cameraOptions'.
     .to({ zoom: 12 }, 3000) // Move to destination in 15 second.
     .easing(Easing.Quadratic.Out) // Use an easing function to make the animation smooth.
     .onUpdate(() => {
-      if (!map.value) return;
-      map.value.moveCamera(cameraOptions);
+      if (!map.value) return
+      map.value.moveCamera(cameraOptions)
     })
-    .start(); // Start the tween immediately.
+    .start() // Start the tween immediately.
 
-  infowindow.value = new google.maps.InfoWindow();
+  infowindow.value = new google.maps.InfoWindow()
   autocomplete.value = new google.maps.places.Autocomplete(
-    input.value as HTMLInputElement
-  );
+    input.value as HTMLInputElement,
+  )
 
   marker.value = new google.maps.Marker({
     position: toronto,
-    title: "Toronto",
+    title: 'Toronto',
     map: map.value,
-  });
+  })
 
-  autocomplete.value.addListener("place_changed", handleSearch);
-});
+  autocomplete.value.addListener('place_changed', handleSearch)
+})
 
 function animate(time: number) {
-  requestAnimationFrame(animate);
-  update(time);
+  requestAnimationFrame(animate)
+  update(time)
 }
 // Adds a marker to the map.
 function addMarker(location: google.maps.LatLngLiteral, map: google.maps.Map) {
@@ -130,15 +129,15 @@ function addMarker(location: google.maps.LatLngLiteral, map: google.maps.Map) {
   // from the array of alphabetical characters.
   const marker = new google.maps.Marker({
     position: location,
-    label: searches.index.toString().padStart(2, "0"),
+    label: searches.index.toString().padStart(2, '0'),
     map: map,
-  });
+  })
 
-  return marker;
+  return marker
 }
 
-requestAnimationFrame(animate);
-defineExpose({ map, marker, addMarker });
+requestAnimationFrame(animate)
+defineExpose({ map, marker, addMarker })
 </script>
 <style lang="scss" scoped>
 input {

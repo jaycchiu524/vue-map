@@ -15,24 +15,24 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import GoogleMap from "./GoogleMap.vue";
-import { useSearchStore } from "@/store/search";
-import Table from "@/components/Table/Table.vue";
-import { computed } from "vue";
+import { ref } from 'vue'
+import GoogleMap from './GoogleMap.vue'
+import { useSearchStore } from '@/store/search'
+import Table from '@/components/Table/Table.vue'
+import { computed } from 'vue'
 
-const isLoading = ref(false);
-const currentLocation = ref({ lat: 0, lng: 0 });
-const mapRef = ref<null | InstanceType<typeof GoogleMap>>(null);
+const isLoading = ref(false)
+const currentLocation = ref({ lat: 0, lng: 0 })
+const mapRef = ref<null | InstanceType<typeof GoogleMap>>(null)
 
-const search = useSearchStore();
-const searches = computed(() => search.all);
-const key = ref(0);
+const search = useSearchStore()
+const searches = computed(() => search.search)
+const key = ref(0)
 
 // Workaround to force re-render Table component
 search.$subscribe((state) => {
-  key.value = Math.random();
-});
+  key.value = Math.random()
+})
 
 // // Get place predictions
 // const getPlacePredictions = async (search: string) => {
@@ -69,32 +69,32 @@ search.$subscribe((state) => {
 // }
 
 const getLocation = () => {
-  isLoading.value = true;
-  const marker = mapRef.value?.marker;
-  if (!marker) return;
-  marker.setVisible(false);
+  isLoading.value = true
+  const marker = mapRef.value?.marker
+  if (!marker) return
+  marker.setVisible(false)
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition((position) => {
       currentLocation.value = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
-      };
-      const map = mapRef.value?.map;
+      }
+      const map = mapRef.value?.map
 
-      marker.setPosition(currentLocation.value);
-      marker.setVisible(true);
+      marker.setPosition(currentLocation.value)
+      marker.setVisible(true)
 
-      if (!map) return;
-      map.panTo(currentLocation.value);
-      isLoading.value = false;
-    });
+      if (!map) return
+      map.panTo(currentLocation.value)
+      isLoading.value = false
+    })
   } else {
-    alert("Geolocation is not supported by this browser.");
-    isLoading.value = false;
-    marker.setVisible(true);
+    alert('Geolocation is not supported by this browser.')
+    isLoading.value = false
+    marker.setVisible(true)
   }
-};
+}
 </script>
 
 <style scoped>
