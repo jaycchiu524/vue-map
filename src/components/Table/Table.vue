@@ -1,101 +1,72 @@
 <template>
-  <v-table id="table" :key="props.search.length" :hover="true">
-    <!-- Meesage if data is empty -->
-    <template v-if="props.search.length === 0">
+  <div>
+    <div class="mb-4">
+      <div class="flex items-center gap-2">
+        <v-btn
+          prepend-icon="mdi-delete-empty"
+          class="rounded p-1 mx-1"
+          color="error"
+          @click="bulkRemove"
+          :disabled="selected.length == 0">
+          Delete Selected
+        </v-btn>
+      </div>
+    </div>
+    <v-table id="table" :hover="true" height="500px" :fixed-header="true">
+      <!-- Meesage if data is empty -->
+      <template v-if="props.search.length === 0">
+        <tbody>
+          <tr>
+            <td class="text-center" colspan="100%">
+              <v-alert prepend-icon="mdi-map-search-outline" class="mx-auto">
+                No data
+              </v-alert>
+            </td>
+          </tr>
+        </tbody>
+      </template>
+      <thead>
+        <tr
+          v-for="headerGroup in table.getHeaderGroups()"
+          :key="headerGroup.id">
+          <th
+            v-for="header in headerGroup.headers"
+            :key="header.id"
+            :colSpan="header.colSpan">
+            <FlexRender
+              v-if="!header.isPlaceholder"
+              :render="header.column.columnDef.header"
+              :props="header.getContext()" />
+          </th>
+        </tr>
+      </thead>
       <tbody>
-        <tr>
-          <td class="text-center" colspan="100%">
-            <v-alert prepend-icon="mdi-map-search-outline" class="mx-auto">
-              No data
-            </v-alert>
+        <tr v-for="row in table.getRowModel().rows" :key="row.id">
+          <td v-for="cell in row.getVisibleCells()" :key="cell.id">
+            <FlexRender
+              :render="cell.column.columnDef.cell"
+              :props="cell.getContext()" />
           </td>
         </tr>
       </tbody>
-    </template>
-    <thead>
-      <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-        <th
-          v-for="header in headerGroup.headers"
-          :key="header.id"
-          :colSpan="header.colSpan">
-          <FlexRender
-            v-if="!header.isPlaceholder"
-            :render="header.column.columnDef.header"
-            :props="header.getContext()" />
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="row in table.getRowModel().rows" :key="row.id">
-        <td v-for="cell in row.getVisibleCells()" :key="cell.id">
-          <FlexRender
-            :render="cell.column.columnDef.cell"
-            :props="cell.getContext()" />
-        </td>
-      </tr>
-    </tbody>
-  </v-table>
-  <div class="mb-4">
-    <div class="flex items-center gap-2">
-      <v-btn
-        class="border rounded p-1 mx-1"
-        color="error"
-        @click="bulkRemove"
-        :disabled="selected.length == 0">
-        Delete Selected
-      </v-btn>
+    </v-table>
+
+    <div class="mb-4">
+      <div class="flex flex-row items-center gap-2">
+        <v-pagination
+          rounded="circle"
+          v-model="goToPageNumber"
+          @update:model-value="handlePageChange"
+          :length="table.getPageCount()"></v-pagination>
+      </div>
+      <v-chip-group>
+        <v-chip>Total Records: {{ table.getRowModel().rows.length }}</v-chip>
+
+        <v-chip
+          >Showing: {{ table.getRowModel().rows.length % 10 }} records</v-chip
+        >
+      </v-chip-group>
     </div>
-  </div>
-  <div class="mb-4">
-    <div class="flex items-center gap-2">
-      <v-btn
-        class="border rounded p-1 mx-1"
-        @click="() => table.setPageIndex(0)"
-        :disabled="!table.getCanPreviousPage()">
-        First Page
-      </v-btn>
-      <v-btn
-        class="border rounded p-1 mx-1"
-        @click="() => table.previousPage()"
-        :disabled="!table.getCanPreviousPage()">
-        Previous
-      </v-btn>
-      <v-btn
-        class="border rounded p-1 mx-1"
-        @click="() => table.nextPage()"
-        :disabled="!table.getCanNextPage()">
-        Next
-      </v-btn>
-      <v-btn
-        class="border rounded p-1 mx-1"
-        @click="() => table.setPageIndex(table.getPageCount() - 1)"
-        :disabled="!table.getCanNextPage()">
-        Last Page
-      </v-btn>
-      <span class="flex items-center gap-1">
-        <div>Page</div>
-        <strong>
-          {{ table.getState().pagination.pageIndex + 1 }} of
-          {{ table.getPageCount() }}
-        </strong>
-      </span>
-      <span class="flex items-center gap-1">
-        | Go to page:
-        <input
-          type="number"
-          :value="goToPageNumber"
-          @change="handleGoToPage"
-          class="border p-1 rounded w-16" />
-      </span>
-      <select
-        :value="table.getState().pagination.pageSize"
-        @change="handlePageSizeChange">
-        <option :key="pageSize" :value="pageSize" v-for="pageSize in pageSizes">
-          Show {{ pageSize }}
-        </option>
-      </select>
-    </div>
-    <div>Total Records: {{ table.getRowModel().rows.length }} Searches</div>
   </div>
 </template>
 
@@ -113,9 +84,6 @@ import { LocationData } from '../types'
 import Checkbox from './Checkbox.vue'
 import Delete from './Delete.vue'
 import { watch } from 'vue'
-interface InputEvent extends Event {
-  target: HTMLInputElement
-}
 
 const INITIAL_PAGE_INDEX = 0
 
@@ -130,6 +98,10 @@ const emits = defineEmits<{
   (e: 'bulkRemove', ids: string[]): void
 }>()
 
+const columnHelper = createColumnHelper<LocationData>()
+const goToPageNumber = ref(INITIAL_PAGE_INDEX + 1)
+const pageSizes = [10, 20, 30, 40, 50]
+
 watch(
   () => props.search,
   () => {
@@ -139,13 +111,10 @@ watch(
       getCoreRowModel: getCoreRowModel(),
       getPaginationRowModel: getPaginationRowModel(),
     })
+    handlePageChange(goToPageNumber.value)
   },
   { deep: true },
 )
-
-const columnHelper = createColumnHelper<LocationData>()
-const goToPageNumber = ref(INITIAL_PAGE_INDEX + 1)
-const pageSizes = [10, 20, 30, 40, 50]
 
 const selected: Ref<string[]> = ref([])
 const remove = (id: string) => {
@@ -225,28 +194,21 @@ const table: Ref<Table<LocationData>> = ref(
   }),
 )
 
-const handleGoToPage = (e: Event) => {
-  const event = e as InputEvent
-  if (!event.target || !event.target?.value) {
-    return
-  }
-  const page = event.target.value ? Number(event.target.value) - 1 : 0
-  goToPageNumber.value = page + 1
-  table.value.setPageIndex(page)
+const handlePageChange = (page: number) => {
+  table.value.setPageIndex(page - 1)
 }
 
-const handlePageSizeChange = (e: Event) => {
-  const event = e as InputEvent
-  if (!event.target || !event.target?.value) {
-    return
-  }
-  table.value.setPageSize(Number(event.target.value))
-}
+// const handlePageSizeChange = (value: number | null) => {
+//   console.log(value)
+//   if (!value) {
+//     return
+//   }
+//   table.value.setPageSize(value)
+// }
 </script>
 <style lang="scss" scoped>
 #table {
   width: 100%;
-  min-height: 400px;
 }
 tbody {
   text-align: start;

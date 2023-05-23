@@ -7,10 +7,11 @@
         ref="mapRef" />
       <SearchInput @change="handleSearch" :is-fetching="isFetching" />
       <CurrentLocationCard
-        class="mb-4"
+        class="my-4"
         v-if="!!search.current"
         :location="search.current" />
       <v-btn
+        class="tw-bg-[#f68c34] tw-text-white"
         id="btn-get-current"
         :loading="isLoading"
         prepend-icon="mdi-map-marker"
@@ -18,6 +19,7 @@
         >Get Current Location</v-btn
       >
       <Table
+        class="my-4"
         :search="search.search"
         @remove="handleRemove"
         @bulk-remove="handleBulkRemove" />
@@ -121,10 +123,4 @@ const getLocation = () => {
 }
 </script>
 
-<style scoped>
-#btn-get-current {
-  background: #f68c34;
-  color: white;
-  min-width: min(100%, 300px);
-}
-</style>
+<style scoped></style>
