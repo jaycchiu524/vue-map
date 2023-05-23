@@ -40,7 +40,7 @@
       <v-btn
         class="border rounded p-1 mx-1"
         color="error"
-        @click="bulkDelete"
+        @click="bulkRemove"
         :disabled="selected.length == 0">
         Delete Selected
       </v-btn>
@@ -96,7 +96,6 @@
       </select>
     </div>
     <div>Total Records: {{ table.getRowModel().rows.length }} Searches</div>
-    <!-- <pre>{{ JSON.stringify(table.getState().pagination, null, 2) }}</pre> -->
   </div>
 </template>
 
@@ -104,17 +103,7 @@
 import {
   createColumnHelper,
   getCoreRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
   getPaginationRowModel,
-  sortingFns,
-  getSortedRowModel,
-  FilterFn,
-  SortingFn,
-  // ColumnDef,
   useVueTable,
   FlexRender,
   Table,
@@ -123,7 +112,6 @@ import { h, ref, Ref } from 'vue'
 import { LocationData } from '../types'
 import Checkbox from './Checkbox.vue'
 import Delete from './Delete.vue'
-import { useSearchStore } from '@/store/search'
 import { watch } from 'vue'
 interface InputEvent extends Event {
   target: HTMLInputElement
@@ -137,12 +125,14 @@ const props = defineProps({
     required: true,
   },
 })
-
-const search = useSearchStore()
+const emits = defineEmits<{
+  (e: 'remove', id: string): void
+  (e: 'bulkRemove', ids: string[]): void
+}>()
 
 watch(
   () => props.search,
-  (state) => {
+  () => {
     table.value = useVueTable({
       data: props.search,
       columns,
@@ -158,11 +148,11 @@ const goToPageNumber = ref(INITIAL_PAGE_INDEX + 1)
 const pageSizes = [10, 20, 30, 40, 50]
 
 const selected: Ref<string[]> = ref([])
-const bulkDelete = () => {
-  confirm('Are you sure you want to delete these searches?')
-  console.log(selected.value)
-  search.bulkRemove(selected.value)
-  selected.value = []
+const remove = (id: string) => {
+  emits('remove', id)
+}
+const bulkRemove = () => {
+  emits('bulkRemove', selected.value)
 }
 
 const columns = [
@@ -220,10 +210,7 @@ const columns = [
     cell: (info) => {
       return h(Delete, {
         row: info.row,
-        onDelete: () => {
-          confirm('Are you sure you want to delete this search?') &&
-            search.remove(info.row.original.id)
-        },
+        onDelete: () => remove(info.row.original.id),
       })
     },
   }),

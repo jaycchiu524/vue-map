@@ -2,18 +2,25 @@
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
       <div class="mb-4" ref="mapRef" style="height: 50vh" />
+      <v-btn class="my-2" @click="handleClick">Toggle Markers</v-btn>
     </v-responsive>
   </v-container>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, Ref } from 'vue'
+import { ref, onMounted, Ref, toRaw } from 'vue'
 import { Easing, Tween, update } from '@tweenjs/tween.js'
 import { watch } from 'vue'
+import { PropType } from 'vue'
+import { LocationData } from './types'
 
 const props = defineProps({
   center: {
     type: google.maps.LatLng,
+    required: true,
+  },
+  markers: {
+    type: Object as PropType<Record<LocationData['id'], google.maps.Marker>>,
     required: true,
   },
 })
@@ -22,6 +29,7 @@ const mapRef: Ref<HTMLDivElement | null> = ref(null)
 const map: Ref<google.maps.Map | null> = ref(null)
 const infowindow: Ref<google.maps.InfoWindow | null> = ref(null)
 const marker = ref<google.maps.Marker | null>(null)
+const showMarkers = ref(true)
 
 watch(
   () => props.center, // watch for changes in props.center
@@ -31,6 +39,28 @@ watch(
     marker.value?.setPosition(props.center)
   },
 )
+
+watch(
+  () => props.markers,
+  () => {
+    if (!map.value) return
+    for (const id in props.markers) {
+      toRaw(props.markers[id]).setMap(map.value)
+    }
+  },
+)
+
+const handleClick = () => {
+  setMapOnAll(map.value, showMarkers.value)
+  showMarkers.value = !showMarkers.value
+}
+
+const setMapOnAll = (map: google.maps.Map | null, showMarkers: boolean) => {
+  for (const id in props.markers) {
+    console.log(id)
+    toRaw(props.markers[id]).setMap(showMarkers ? map : null)
+  }
+}
 
 onMounted(() => {
   const cameraOptions: google.maps.CameraOptions = {
