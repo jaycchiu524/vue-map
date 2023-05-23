@@ -1,7 +1,8 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
-      <GoogleMap ref="mapRef" />
+      <GoogleMap :center="currentLocation" ref="mapRef" />
+      <SearchInput @change="handleSearch" :is-fetching="isFetching" />
       <CurrentLocationCard
         class="mb-4"
         v-if="!!search.current"
@@ -24,11 +25,12 @@ import GoogleMap from './GoogleMap.vue'
 import { useSearchStore } from '@/store/search'
 import Table from '@/components/Table/Table.vue'
 import CurrentLocationCard from './CurrentLocationCard.vue'
+import SearchInput from './SearchInput.vue'
 
 const isLoading = ref(false)
-const currentLocation = ref({ lat: 0, lng: 0 })
+const isFetching = ref(false)
+const currentLocation = ref(new google.maps.LatLng(43.6532, -79.3832))
 const mapRef = ref<null | InstanceType<typeof GoogleMap>>(null)
-
 const search = useSearchStore()
 const key = ref(0)
 
@@ -37,65 +39,67 @@ search.$subscribe((state) => {
   key.value = Math.random()
 })
 
-// // Get place predictions
-// const getPlacePredictions = async (search: string) => {
-//   const res = await autocompleteService.getPlacePredictions(
-//     {
-//       input: search,
-//       types: ["establishment", "geocode"],
-//     }
-//     // callback
-//   );
-//   console.log(res);
-// };
+const handleSearch = (place: google.maps.places.PlaceResult) => {
+  const map = mapRef.value?.map
+  if (!place.geometry || !place.geometry.location) {
+    // User entered the name of a Place that was not suggested and
+    // pressed the Enter key, or the Place Details request failed.
+    window.alert("No details available for input: '" + place.name + "'")
+    isFetching.value = false
+    return
+  }
 
-// // Get place details
-// function getPlaceDetails(placeId: string) {
-//   const request: google.maps.places.PlaceDetailsRequest = {
-//     placeId: placeId,
-//   };
+  // If the place has a geometry, then present it on a map.
+  if (!map) {
+    isFetching.value = false
+    return
+  }
 
-//   placesService.getDetails(request, function (place, status) {
-//     if (place && status === google.maps.places.PlacesServiceStatus.OK) {
-//       const center = place.geometry?.location;
-//       const marker = new google.maps.Marker({
-//         position: center,
-//         map: map,
-//       });
+  if (place.geometry.viewport) {
+    map.fitBounds(place.geometry.viewport)
+  } else {
+    map.setCenter(place.geometry.location)
+    map.setZoom(17)
+  }
 
-//       if (center) map.setCenter(center);
+  const id = search.index.toString().padStart(2, '0')
+  const m = new google.maps.Marker({
+    map: map,
+    position: place.geometry.location,
+    label: id,
+  })
 
-//       // Hide autocomplete results
-//       // results.style.display = "none";
-//     }
-//   });
-// }
+  search.addMarker(m, id)
+
+  if (place.name) {
+    search.add({
+      id: id,
+      gid: place.place_id,
+      name: place.name,
+      address: place.formatted_address,
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    })
+  }
+
+  isFetching.value = false
+}
 
 const getLocation = () => {
   isLoading.value = true
-  const marker = mapRef.value?.marker
-  if (!marker) return
-  marker.setVisible(false)
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition((position) => {
-      currentLocation.value = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      }
-      const map = mapRef.value?.map
+      currentLocation.value = new google.maps.LatLng(
+        position.coords.latitude,
+        position.coords.longitude,
+      )
 
-      marker.setPosition(currentLocation.value)
-      marker.setVisible(true)
-
-      if (!map) return
-      map.panTo(currentLocation.value)
       isLoading.value = false
     })
   } else {
     alert('Geolocation is not supported by this browser.')
     isLoading.value = false
-    marker.setVisible(true)
   }
 }
 </script>
