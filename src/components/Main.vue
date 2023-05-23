@@ -1,7 +1,10 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
-      <GoogleMap :center="currentLocation" ref="mapRef" />
+      <GoogleMap
+        :center="currentLocation"
+        :markers="search.markers"
+        ref="mapRef" />
       <SearchInput @change="handleSearch" :is-fetching="isFetching" />
       <CurrentLocationCard
         class="mb-4"
@@ -14,7 +17,10 @@
         @click.prevent="getLocation"
         >Get Current Location</v-btn
       >
-      <Table :key="key" :searches="search.search" />
+      <Table
+        :search="search.search"
+        @remove="handleRemove"
+        @bulk-remove="handleBulkRemove" />
     </v-responsive>
   </v-container>
 </template>
@@ -26,18 +32,29 @@ import { useSearchStore } from '@/store/search'
 import Table from '@/components/Table/Table.vue'
 import CurrentLocationCard from './CurrentLocationCard.vue'
 import SearchInput from './SearchInput.vue'
+import { toRaw } from 'vue'
 
 const isLoading = ref(false)
 const isFetching = ref(false)
 const currentLocation = ref(new google.maps.LatLng(43.6532, -79.3832))
 const mapRef = ref<null | InstanceType<typeof GoogleMap>>(null)
 const search = useSearchStore()
-const key = ref(0)
 
-// Workaround to force re-render Table component
-search.$subscribe((state) => {
-  key.value = Math.random()
-})
+const handleRemove = (id: string) => {
+  const c = confirm('Are you sure you want to delete this search?')
+  if (!c) return
+  toRaw(search.markers[id]).setMap(null)
+  search.remove(id)
+}
+
+const handleBulkRemove = (ids: string[]) => {
+  const c = confirm('Are you sure you want to delete these searches?')
+  if (!c) return
+  ids.forEach((id) => {
+    toRaw(search.markers[id]).setMap(null)
+  })
+  search.bulkRemove(ids)
+}
 
 const handleSearch = (place: google.maps.places.PlaceResult) => {
   const map = mapRef.value?.map
