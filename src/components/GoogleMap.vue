@@ -4,10 +4,6 @@
       <div class="mb-4" ref="mapRef" style="height: 50vh" />
 
       <input ref="input" label="Search Places" />
-
-      <CurrentLocationCard
-        v-if="!!searches.current"
-        :location="searches.current" />
     </v-responsive>
   </v-container>
 </template>
@@ -17,7 +13,6 @@ import { ref, onMounted, Ref } from 'vue'
 import { Loader } from '@googlemaps/js-api-loader'
 import { Easing, Tween, update } from '@tweenjs/tween.js'
 import { useSearchStore } from '@/store/search'
-import CurrentLocationCard from './CurrentLocationCard.vue'
 
 const input: Ref<HTMLInputElement | null> = ref(null)
 const apiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY
@@ -27,7 +22,7 @@ const loader = new Loader({
   libraries: ['places'],
 })
 
-const searches = useSearchStore()
+const search = useSearchStore()
 const mapRef: Ref<HTMLDivElement | null> = ref(null)
 const map: Ref<google.maps.Map | null> = ref(null)
 const marker: Ref<google.maps.Marker | null> = ref(null)
@@ -64,11 +59,11 @@ const handleSearch = () => {
     map.value.setZoom(17)
   }
 
-  const id = searches.index.toString().padStart(2, '0')
+  const id = search.index.toString().padStart(2, '0')
   addMarker(place.geometry.location.toJSON(), map.value)
 
   if (place.name) {
-    searches.add({
+    search.add({
       id: id,
       gid: place.place_id,
       name: place.name,
@@ -129,7 +124,7 @@ function addMarker(location: google.maps.LatLngLiteral, map: google.maps.Map) {
   // from the array of alphabetical characters.
   const marker = new google.maps.Marker({
     position: location,
-    label: searches.index.toString().padStart(2, '0'),
+    label: search.index.toString().padStart(2, '0'),
     map: map,
   })
 
@@ -137,7 +132,7 @@ function addMarker(location: google.maps.LatLngLiteral, map: google.maps.Map) {
 }
 
 requestAnimationFrame(animate)
-defineExpose({ map, marker, addMarker })
+defineExpose({ map, marker })
 </script>
 <style lang="scss" scoped>
 input {

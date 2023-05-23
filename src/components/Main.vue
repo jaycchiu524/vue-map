@@ -2,6 +2,10 @@
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
       <GoogleMap ref="mapRef" />
+      <CurrentLocationCard
+        class="mb-4"
+        v-if="!!search.current"
+        :location="search.current" />
       <v-btn
         id="btn-get-current"
         :loading="isLoading"
@@ -9,7 +13,7 @@
         @click.prevent="getLocation"
         >Get Current Location</v-btn
       >
-      <Table :key="key" :searches="searches" />
+      <Table :key="key" :searches="search.search" />
     </v-responsive>
   </v-container>
 </template>
@@ -19,14 +23,13 @@ import { ref } from 'vue'
 import GoogleMap from './GoogleMap.vue'
 import { useSearchStore } from '@/store/search'
 import Table from '@/components/Table/Table.vue'
-import { computed } from 'vue'
+import CurrentLocationCard from './CurrentLocationCard.vue'
 
 const isLoading = ref(false)
 const currentLocation = ref({ lat: 0, lng: 0 })
 const mapRef = ref<null | InstanceType<typeof GoogleMap>>(null)
 
 const search = useSearchStore()
-const searches = computed(() => search.search)
 const key = ref(0)
 
 // Workaround to force re-render Table component
