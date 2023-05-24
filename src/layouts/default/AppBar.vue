@@ -3,7 +3,7 @@
     <v-app-bar-title>
       <v-icon icon="mdi-map" />
 
-      Vue MapMarker Demo
+      Vue MapMarker
     </v-app-bar-title>
   </v-app-bar>
 </template>

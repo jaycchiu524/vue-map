@@ -1,23 +1,25 @@
 <template>
-  <v-container class="fill-height">
-    <v-responsive class="d-flex align-center text-center fill-height">
-      <GoogleMap
-        :center="currentLocation"
-        :markers="search.markers"
-        ref="mapRef" />
-      <SearchInput @change="handleSearch" :is-fetching="isFetching" />
-      <CurrentLocationCard
-        class="my-4"
-        v-if="!!search.current"
-        :location="search.current" />
+  <div class="tw-sticky tw-top-[64px] tw-left-0 tw-right-0 tw-z-10">
+    <GoogleMap
+      :center="currentLocation"
+      :markers="search.markers"
+      ref="mapRef" />
+  </div>
+  <v-container class="">
+    <v-responsive class="d-flex align-center text-center">
       <v-btn
-        class="tw-bg-[#f68c34] tw-text-white"
+        class="bg-amber"
         id="btn-get-current"
         :loading="isLoading"
         prepend-icon="mdi-map-marker"
         @click.prevent="getLocation"
         >Get Current Location</v-btn
       >
+      <div class="my-4">
+        <SearchInput @change="handleSearch" :is-fetching="isFetching" />
+      </div>
+      <CurrentLocationCard class="my-4" :location="search.current" />
+
       <Table
         class="my-4"
         :search="search.search"
@@ -38,7 +40,7 @@ import { toRaw } from 'vue'
 
 const isLoading = ref(false)
 const isFetching = ref(false)
-const currentLocation = ref(new google.maps.LatLng(43.6532, -79.3832))
+const currentLocation = ref(new google.maps.LatLng(43.6532, -79.3832)) // Toronto
 const mapRef = ref<null | InstanceType<typeof GoogleMap>>(null)
 const search = useSearchStore()
 
