@@ -13,6 +13,9 @@ import { createApp } from 'vue'
 // Plugins
 import { registerPlugins } from '@/plugins'
 
+// Tailwind
+import '@/assets/css/tailwind.css'
+
 const app = createApp(App)
 
 registerPlugins(app)
