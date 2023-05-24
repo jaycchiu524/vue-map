@@ -2,9 +2,8 @@
   <v-card
     class="mx-auto d-flex text-start flex-column"
     max-width="500"
-    v-if="!!location"
-    :title="location.name"
-    :subtitle="location.address">
+    :title="location?.name || 'Current Location'"
+    :subtitle="location?.address || 'Current Location'">
     <v-card-text>
       <div class="tw-text-[48px] tw-leading-tight">{{ local.time }}</div>
       <div>{{ local.date }}</div>
@@ -12,16 +11,17 @@
     <v-card-text>
       <div>
         <span class="font-weight-bold">UTC Time: </span>
-        <span>{{ utc.date }}</span>
-        <span>{{ utc.time }}</span>
+        <span>{{ `${utc.date} ${utc.time}` }}</span>
       </div>
       <div>
         <span class="font-weight-bold">Time Zone: </span>
-        <span>{{ timezone }}</span>
+        <span>{{ timezone ?? 'N/A' }}</span>
       </div>
       <div>
         <span class="font-weight-bold">Geolocation: </span>
-        <span>{{ `${location.lat}, ${location.lng}` }}</span>
+        <span>{{
+          location ? `${location?.lat}, ${location?.lng}` : 'N/A'
+        }}</span>
       </div>
     </v-card-text>
   </v-card>
@@ -32,6 +32,7 @@ import { utcToZonedTime, format } from 'date-fns-tz'
 import axios from 'axios'
 import { LocationData } from './types'
 import { PropType } from 'vue'
+import { watch } from 'vue'
 
 const getTimezone = async (lat: number, lng: number) => {
   const API_KEY = import.meta.env.VITE_GOOGLE_MAP_API_KEY
@@ -52,29 +53,33 @@ const getTimezone = async (lat: number, lng: number) => {
   return response.data
 }
 
-const props = defineProps({
-  location: {
-    type: Object as PropType<LocationData>,
-    required: true,
+const props = defineProps<{
+  location: LocationData | null
+}>()
+
+watch(
+  () => props.location,
+  () => {
+    updateTimezone()
   },
-})
+)
 
 const utc = ref(getUTCTime())
 const local = ref(getLocalTime())
-const timezone = ref('')
+const timezone = ref('N/A')
 
 function getUTCTime() {
   const date = new Date()
   return {
-    date: format(utcToZonedTime(date, 'UTC'), 'yyyy-MM-dd'),
-    time: format(utcToZonedTime(date, 'UTC'), 'HH:mm:ss'),
+    date: format(utcToZonedTime(date, 'UTC'), 'dd MMMM yyyy'),
+    time: format(utcToZonedTime(date, 'UTC'), 'HH:mm:ss aaa'),
   }
 }
 function getLocalTime(timezone = 'America/Toronto') {
   const date = new Date()
   return {
-    date: format(utcToZonedTime(date, timezone), 'yyyy-MM-dd'),
-    time: format(utcToZonedTime(date, timezone), 'HH:mm:ss'),
+    date: format(utcToZonedTime(date, timezone), 'dd MMMM yyyy (EEEE)'),
+    time: format(utcToZonedTime(date, timezone), 'HH:mm:ss bb'),
   }
 }
 

@@ -12,7 +12,11 @@
         </v-btn>
       </div>
     </div>
-    <v-table id="table" :hover="true" height="500px" :fixed-header="true">
+    <v-table
+      id="table"
+      class="tw-min-h-[300px]"
+      :hover="true"
+      :fixed-header="true">
       <!-- Meesage if data is empty -->
       <template v-if="props.search.length === 0">
         <tbody>
@@ -60,10 +64,9 @@
           :length="table.getPageCount()"></v-pagination>
       </div>
       <v-chip-group>
-        <v-chip>Total Records: {{ table.getRowModel().rows.length }}</v-chip>
-
         <v-chip
-          >Showing: {{ table.getRowModel().rows.length % 10 }} records</v-chip
+          >Showing {{ table.getPaginationRowModel().rows.length }} /
+          {{ search.length }} records</v-chip
         >
       </v-chip-group>
     </div>
@@ -143,35 +146,27 @@ const columns = [
       })
     },
   }),
-  columnHelper.group({
-    header: 'Info',
-    columns: [
-      columnHelper.accessor('id', {
-        header: () => 'ID',
-        footer: (props) => props.column.id,
-      }),
-      columnHelper.accessor('name', {
-        header: () => 'Name',
-        footer: (props) => props.column.id,
-      }),
-      columnHelper.accessor('address', {
-        header: () => 'Address',
-        footer: (props) => props.column.id,
-      }),
-    ],
+
+  columnHelper.accessor('id', {
+    header: () => 'ID',
+    footer: (props) => props.column.id,
   }),
-  columnHelper.group({
-    header: 'Geolocation',
-    columns: [
-      columnHelper.accessor('lat', {
-        header: () => 'Latitude',
-        footer: (props) => props.column.id,
-      }),
-      columnHelper.accessor('lng', {
-        header: 'Longitude',
-        footer: (props) => props.column.id,
-      }),
-    ],
+  columnHelper.accessor('name', {
+    header: () => 'Name',
+    footer: (props) => props.column.id,
+  }),
+  columnHelper.accessor('address', {
+    header: () => 'Address',
+    footer: (props) => props.column.id,
+  }),
+
+  columnHelper.accessor('lat', {
+    header: () => 'Latitude',
+    footer: (props) => props.column.id,
+  }),
+  columnHelper.accessor('lng', {
+    header: 'Longitude',
+    footer: (props) => props.column.id,
   }),
   columnHelper.display({
     header: () => 'Actions',

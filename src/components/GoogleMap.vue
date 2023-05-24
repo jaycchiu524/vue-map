@@ -1,10 +1,5 @@
 <template>
-  <v-container class="fill-height">
-    <v-responsive class="d-flex align-center text-center fill-height">
-      <div class="mb-4" ref="mapRef" style="height: 50vh" />
-      <v-btn class="my-2" @click="handleClick">Toggle Markers</v-btn>
-    </v-responsive>
-  </v-container>
+  <div class="mb-4 tw-h-[35vh] tw-w-full" ref="mapRef" />
 </template>
 
 <script lang="ts" setup>
@@ -16,7 +11,7 @@ import { LocationData } from './types'
 
 const props = defineProps({
   center: {
-    type: google.maps.LatLng,
+    type: Object as PropType<google.maps.LatLng>,
     required: true,
   },
   markers: {
