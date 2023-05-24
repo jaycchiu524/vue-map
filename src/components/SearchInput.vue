@@ -1,5 +1,5 @@
 <template>
-  <div id="container" class="d-flex flex-column tw-mx-auto">
+  <div id="container" class="tw-flex tw-flex-col tw-mx-auto">
     <input ref="input" label="Search Places" :disabled="props.isFetching" />
     <v-row>
       <v-col>
