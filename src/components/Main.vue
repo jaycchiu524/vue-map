@@ -5,28 +5,32 @@
       :markers="search.markers"
       ref="mapRef" />
   </div>
-  <v-container class="">
-    <v-responsive class="align-center text-center">
-      <v-btn
-        class="bg-amber"
-        id="btn-get-current"
-        :loading="isLoading"
-        prepend-icon="mdi-map-marker"
-        @click.prevent="getLocation"
-        >Get Current Location</v-btn
-      >
-      <div class="my-4">
-        <SearchInput @change="handleSearch" :is-fetching="isFetching" />
+  <div class="tw-flex tw-flex-col tw-p-4">
+    <div class="tw-flex tw-flex-col sm:tw-flex-row tw-gap-2">
+      <div class="tw-flex tw-flex-1 tw-flex-col tw-justify-center">
+        <v-btn
+          class="bg-amber mx-auto"
+          id="btn-get-current"
+          :loading="isLoading"
+          prepend-icon="mdi-map-marker"
+          @click.prevent="getLocation"
+          >{{ currentLocation || 'Get Current Location' }}</v-btn
+        >
+        <div class="my-4">
+          <SearchInput @change="handleSearch" :is-fetching="isFetching" />
+        </div>
       </div>
-      <CurrentLocationCard class="my-4" :location="search.current" />
+      <CurrentLocationCard
+        class="tw-flex tw-flex-1 tw-flex-col tw-justify-center tw-w-full sm:tw-w-auto"
+        :location="search.current" />
+    </div>
 
-      <Table
-        class="my-4"
-        :search="search.search"
-        @remove="handleRemove"
-        @bulk-remove="handleBulkRemove" />
-    </v-responsive>
-  </v-container>
+    <Table
+      class="my-4"
+      :search="search.search"
+      @remove="handleRemove"
+      @bulk-remove="handleBulkRemove" />
+  </div>
 </template>
 
 <script lang="ts" setup>
