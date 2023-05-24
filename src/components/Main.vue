@@ -6,7 +6,7 @@
       ref="mapRef" />
   </div>
   <v-container class="">
-    <v-responsive class="d-flex align-center text-center">
+    <v-responsive class="align-center text-center">
       <v-btn
         class="bg-amber"
         id="btn-get-current"
