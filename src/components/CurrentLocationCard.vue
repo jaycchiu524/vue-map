@@ -15,7 +15,7 @@
       </div>
       <div>
         <span class="font-weight-bold">Time Zone: </span>
-        <span>{{ timezone ?? 'N/A' }}</span>
+        <span>{{ timezone }}</span>
       </div>
       <div>
         <span class="font-weight-bold">Geolocation: </span>
@@ -66,7 +66,7 @@ watch(
 
 const utc = ref(getUTCTime())
 const local = ref(getLocalTime())
-const timezone = ref('N/A')
+const timezone = ref('')
 
 function getUTCTime() {
   const date = new Date()
