@@ -1,63 +1,23 @@
-# essentials
+<div align="center">
+  <h3 align="center">Vue Map Marker</h3>
 
-## Project setup
+  <!-- <p align="center">
+    An awesome README template to jumpstart your projects!
+    <br />
+    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
+    ·
+    <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/othneildrew/Best-README-Template/issues">Request Feature</a>
+  </p> -->
+</div>
 
-```
-# yarn
-yarn
+### RoadMap
 
-# npm
-npm install
-
-# pnpm
-pnpm install
-```
-
-### Compiles and hot-reloads for development
-
-```
-# yarn
-yarn dev
-
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-```
-
-### Compiles and minifies for production
-
-```
-# yarn
-yarn build
-
-# npm
-npm run build
-
-# pnpm
-pnpm build
-```
-
-### Lints and fixes files
-
-```
-# yarn
-yarn lint
-
-# npm
-npm run lint
-
-# pnpm
-pnpm lint
-```
-
-### Customize configuration
-
-See [Configuration Reference](https://vitejs.dev/config/).
-
-### Requirements
-
+#### Requirements
 - [x] A button to allow users to acquire their current location from their browser.
 
 - [x] A search module that lets users input the name of a location. The search feature is triggered by both button clicks and pressing the enter key on the keyboard.
@@ -71,3 +31,19 @@ See [Configuration Reference](https://vitejs.dev/config/).
   - [x] A delete button on the top to remove all selected records as well as their markers on the map.
 
 - [x] Display the time zone and local time of the latest searched location.
+
+#### Optional
+- [ ] Testing 
+
+
+### Compiles and hot-reloads for development
+
+```
+yarn dev
+```
+
+### Compiles and minifies for production
+
+```
+yarn build
+```
